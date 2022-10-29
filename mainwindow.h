@@ -17,5 +17,6 @@ public:
 
 private:
     Ui::MainWindow *ui;
+    void setIcons();
 };
 #endif // MAINWINDOW_H

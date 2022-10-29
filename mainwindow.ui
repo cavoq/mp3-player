@@ -59,6 +59,9 @@
     <property name="text">
      <string>vS</string>
     </property>
+    <property name="arrowType">
+     <enum>Qt::NoArrow</enum>
+    </property>
    </widget>
    <widget class="QToolButton" name="rewindButton">
     <property name="geometry">
@@ -85,6 +88,9 @@
     <property name="text">
      <string>nS</string>
     </property>
+    <property name="arrowType">
+     <enum>Qt::NoArrow</enum>
+    </property>
    </widget>
    <widget class="QToolButton" name="lastSongButton">
     <property name="geometry">
@@ -98,6 +104,9 @@
     <property name="text">
      <string>lS</string>
     </property>
+    <property name="arrowType">
+     <enum>Qt::NoArrow</enum>
+    </property>
    </widget>
    <widget class="QToolButton" name="playStopButton">
     <property name="geometry">
@@ -110,6 +119,9 @@
     </property>
     <property name="text">
      <string>play/stop</string>
+    </property>
+    <property name="checkable">
+     <bool>true</bool>
     </property>
    </widget>
    <widget class="QLabel" name="currentTimeLabel">
