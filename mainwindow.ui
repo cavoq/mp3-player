@@ -27,11 +27,14 @@
    <widget class="QLineEdit" name="songSearchLineEdit">
     <property name="geometry">
      <rect>
-      <x>120</x>
+      <x>190</x>
       <y>30</y>
-      <width>411</width>
+      <width>371</width>
       <height>41</height>
      </rect>
+    </property>
+    <property name="placeholderText">
+     <string>Song suchen</string>
     </property>
    </widget>
    <widget class="QSlider" name="songSlider">
@@ -56,6 +59,9 @@
       <height>41</height>
      </rect>
     </property>
+    <property name="toolTip">
+     <string extracomment="Vorspulen"/>
+    </property>
     <property name="text">
      <string>vS</string>
     </property>
@@ -72,6 +78,9 @@
       <height>41</height>
      </rect>
     </property>
+    <property name="toolTip">
+     <string extracomment="Zurückspulen"/>
+    </property>
     <property name="text">
      <string>zS</string>
     </property>
@@ -84,6 +93,9 @@
       <width>61</width>
       <height>41</height>
      </rect>
+    </property>
+    <property name="toolTip">
+     <string extracomment="Nächster Song">Nächster Song</string>
     </property>
     <property name="text">
      <string>nS</string>
@@ -101,6 +113,9 @@
       <height>41</height>
      </rect>
     </property>
+    <property name="toolTip">
+     <string extracomment="Letzter Song"/>
+    </property>
     <property name="text">
      <string>lS</string>
     </property>
@@ -116,6 +131,9 @@
       <width>61</width>
       <height>41</height>
      </rect>
+    </property>
+    <property name="toolTip">
+     <string extracomment="Song abspielen"/>
     </property>
     <property name="text">
      <string>play/stop</string>
@@ -179,11 +197,14 @@
    <widget class="QToolButton" name="stopButton">
     <property name="geometry">
      <rect>
-      <x>550</x>
+      <x>580</x>
       <y>30</y>
       <width>61</width>
       <height>41</height>
      </rect>
+    </property>
+    <property name="toolTip">
+     <string extracomment="Wiedergabe stoppen"/>
     </property>
     <property name="text">
      <string>Stop</string>
@@ -218,14 +239,14 @@
    <widget class="QToolButton" name="randomSongButton">
     <property name="geometry">
      <rect>
-      <x>550</x>
+      <x>530</x>
       <y>380</y>
-      <width>61</width>
+      <width>121</width>
       <height>41</height>
      </rect>
     </property>
     <property name="text">
-     <string>Zufall</string>
+     <string>Zufallswiedergabe</string>
     </property>
    </widget>
    <widget class="QToolButton" name="muteButton">
@@ -237,6 +258,9 @@
       <height>41</height>
      </rect>
     </property>
+    <property name="toolTip">
+     <string extracomment="Stummschalten"/>
+    </property>
     <property name="text">
      <string>Stumm</string>
     </property>
@@ -244,14 +268,14 @@
    <widget class="QToolButton" name="loadPlayListButton">
     <property name="geometry">
      <rect>
-      <x>40</x>
+      <x>30</x>
       <y>30</y>
-      <width>61</width>
+      <width>141</width>
       <height>41</height>
      </rect>
     </property>
     <property name="text">
-     <string>Laden</string>
+     <string>Songs laden</string>
     </property>
    </widget>
   </widget>

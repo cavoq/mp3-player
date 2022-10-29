@@ -21,5 +21,7 @@ void MainWindow::setIcons()
     ui->lastSongButton->setIcon(QIcon(":/icons/last.png"));
     ui->nextSongButton->setIcon(QIcon(":/icons/next.png"));
     ui->muteButton->setIcon(QIcon(":/icons/mute.png"));
+    ui->stopButton->setIcon(QIcon(":/icons/stop.png"));
+    ui->playStopButton->setIcon(QIcon(":/icons/resumePlaying.png"));
 }
 
