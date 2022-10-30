@@ -1,5 +1,6 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
+#include <iostream>
 
 #include <QFileDialog>
 
@@ -9,7 +10,7 @@ MainWindow::MainWindow(QWidget *parent)
 {
     ui->setupUi(this);
     setIcons();
-    connect(ui->loadPlayListButton, SIGNAL(click()), SLOT(readSongs()));
+    connect(ui->loadPlaylistButton, SIGNAL(clicked()), SLOT(getSongs()));
 }
 
 MainWindow::~MainWindow()
@@ -28,7 +29,9 @@ void MainWindow::setIcons()
     ui->playStopButton->setIcon(QIcon(":/icons/resumePlaying.png"));
 }
 
-void MainWindow::readSongs()
+QStringList MainWindow::getSongs()
 {
-    QStringList songPaths = QFileDialog::getOpenFileNames(this, tr("Wähle songs aus"), "/home", tr("MP3 Files (*.mp3)" ));
+    QStringList songs = QFileDialog::getOpenFileNames(this, tr("Wähle songs aus"), "/home", tr("MP3 Files (*.mp3)" ));
+    std::cout << songs[0].toStdString() << std::endl;
+    return songs;
 }

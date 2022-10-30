@@ -286,7 +286,7 @@
      <string>Stumm</string>
     </property>
    </widget>
-   <widget class="QToolButton" name="loadPlayListButton">
+   <widget class="QPushButton" name="loadPlaylistButton">
     <property name="geometry">
      <rect>
       <x>30</x>

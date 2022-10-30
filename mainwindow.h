@@ -14,7 +14,7 @@ class MainWindow : public QMainWindow
     Q_OBJECT
 
 public slots:
-    void readSongs();
+    QStringList getSongs();
 
 public:
     MainWindow(QWidget *parent = nullptr);
@@ -25,6 +25,5 @@ private:
     SongTableModel *model;
     QMediaPlayer *player = new QMediaPlayer();
     void setIcons();
-    void readFiles();
 };
 #endif // MAINWINDOW_H
