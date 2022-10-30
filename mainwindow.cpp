@@ -1,12 +1,15 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
 
+#include <QFileDialog>
+
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
     , ui(new Ui::MainWindow)
 {
     ui->setupUi(this);
     setIcons();
+    connect(ui->loadPlayListButton, SIGNAL(click()), SLOT(readSongs()));
 }
 
 MainWindow::~MainWindow()
@@ -25,3 +28,7 @@ void MainWindow::setIcons()
     ui->playStopButton->setIcon(QIcon(":/icons/resumePlaying.png"));
 }
 
+void MainWindow::readSongs()
+{
+    QStringList songPaths = QFileDialog::getOpenFileNames(this, tr("Wähle songs aus"), "/home", tr("MP3 Files (*.mp3)" ));
+}

@@ -1,6 +1,7 @@
 QT       += core gui
+QT += multimedia
 
-greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
+greaterThan(QT_MAJOR_VERSION, 5): QT += widgets
 
 CONFIG += c++17
 
@@ -10,10 +11,14 @@ CONFIG += c++17
 
 SOURCES += \
     main.cpp \
-    mainwindow.cpp
+    mainwindow.cpp \
+    song.cpp \
+    songtablemodel.cpp
 
 HEADERS += \
-    mainwindow.h
+    mainwindow.h \
+    song.h \
+    songtablemodel.h
 
 FORMS += \
     mainwindow.ui
