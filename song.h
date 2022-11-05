@@ -8,12 +8,7 @@ class Song
 
 public:
     Song();
-    Song(QString titel, QString artist, QString album, QString length, QString path);
-    QString titel;
-    QString artist;
-    QString album;
-    QString length;
-    QString path;
+    Song(
 };
 
 #endif // SONG_H
