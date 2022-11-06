@@ -23,8 +23,11 @@ public slots:
     void onDurationChanged(qint64 duration);
     void onPositionChanged(qint64 position);
     void onVolumeChanged(int volume);
+    void onCurrentMediaChanged(QMediaContent currentMedia);
     void fastForward();
     void rewind();
+    void nextSong();
+    void previousSong();
     void onSongSliderReleased();
     void onMediaStatusChanged(QMediaPlayer::MediaStatus status);
     void onMetaDataChanged();

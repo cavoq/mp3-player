@@ -31,3 +31,5 @@ AudioMedia AudioPlaylist::currentAudio()
     int currentIndex = QMediaPlaylist::currentIndex();
     return this->audioContent.at(currentIndex);
 }
+
+

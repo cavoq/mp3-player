@@ -29,6 +29,7 @@ MainWindow::MainWindow(QWidget *parent)
     connect(ui->songSlider, SIGNAL(sliderPressed()), player, SLOT(pause()));
     connect(ui->songSlider, SIGNAL(sliderReleased()), this, SLOT(onSongSliderReleased()));
     connect(ui->soundVolumeSlider, SIGNAL(sliderMoved(int)), player, SLOT(setVolume(int)));
+    connect(player, SIGNAL(currentMediaChanged(QMediaContent)), this, SLOT(onCurrentMediaChanged(QMediaContent)));
     connect(player, SIGNAL(volumeChanged(int)), this, SLOT(onVolumeChanged(int)));
     connect(player, SIGNAL(durationChanged(qint64)), this,  SLOT(onDurationChanged(qint64)));
     connect(player, SIGNAL(positionChanged(qint64)), this, SLOT(onPositionChanged(qint64)));
@@ -100,6 +101,14 @@ void MainWindow::onPositionChanged(qint64 position)
     ui->songSlider->setSliderPosition(position);
 }
 
+void MainWindow::onCurrentMediaChanged(QMediaContent currentMedia)
+{
+    int currentIndex = player->playlist()->currentIndex();
+    ui->playlistTableView->selectRow(currentIndex);
+    ui->songNameLabel->setText(playlistTableModel->getPlaylist()->currentAudio().titel);
+    ui->interpretLabel->setText(playlistTableModel->getPlaylist()->currentAudio().artist);
+}
+
 void MainWindow::setTimeLabel(QLabel *label, qint64 timeInMs)
 {
     QString timeAsString = QDateTime::fromTime_t(long (timeInMs / 1000)).toUTC().toString("m:ss");
@@ -146,6 +155,27 @@ void MainWindow::loadPlaylist()
     for (int i = 0; i < songUrls.count(); ++i) {
         playlistTableModel->setRowData(playlistTableModel->getIndexesOfRow(i), getMetaData(songUrls[i]));
     }
+    player->setPlaylist(playlist);
+    connect(ui->nextSongButton, SIGNAL(clicked()), this, SLOT(nextSong()));
+    connect(ui->lastSongButton, SIGNAL(clicked()), this, SLOT(previousSong()));
+}
+
+void MainWindow::nextSong()
+{
+    int currentIndex = player->playlist()->currentIndex();
+    if (currentIndex >= player->playlist()->mediaCount() - 1) {
+        return;
+    }
+    player->playlist()->setCurrentIndex(currentIndex + 1);
+}
+
+void MainWindow::previousSong()
+{
+    int currentIndex = player->playlist()->currentIndex();
+    if (currentIndex <= 0) {
+        return;
+    }
+    player->playlist()->setCurrentIndex(currentIndex - 1);
 }
 
 QList<QUrl> MainWindow::getSongUrlsFromDialog()
@@ -170,7 +200,8 @@ QVariantList MainWindow::getMetaData(QUrl songUrl)
 void MainWindow::onMediaStatusChanged(QMediaPlayer::MediaStatus status)
 {
     if (status == QMediaPlayer::MediaStatus::LoadedMedia) {
-
+        ui->songNameLabel->setText(playlistTableModel->getPlaylist()->currentAudio().titel);
+        ui->interpretLabel->setText(playlistTableModel->getPlaylist()->currentAudio().artist);
     }
 }
 
