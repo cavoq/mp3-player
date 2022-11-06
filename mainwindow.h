@@ -2,6 +2,8 @@
 #define MAINWINDOW_H
 
 #include "playlisttablemodel.h"
+#include "qlabel.h"
+#include "qtoolbutton.h"
 #include <QMainWindow>
 #include <QMediaPlayer>
 #include <QMediaPlaylist>
@@ -16,6 +18,14 @@ class MainWindow : public QMainWindow
 
 public slots:
     void loadPlaylist();
+    void switchPlaying(bool playing);
+    void switchMute(bool muted);
+    void onDurationChanged(qint64 duration);
+    void onPositionChanged(qint64 position);
+    void onVolumeChanged(int volume);
+    void fastForward();
+    void rewind();
+    void onSongSliderReleased();
     void onMediaStatusChanged(QMediaPlayer::MediaStatus status);
     void onMetaDataChanged();
 
@@ -28,8 +38,11 @@ private:
     PlaylistTableModel *playlistTableModel;
     QMediaPlayer *player;
     void setIcons();
+    void setTimeLabel(QLabel *label, qint64 timeInMs);
+    void setPosition(qint64 position);
+    void switchButton(QToolButton *button, QIcon icon, QString tooltip);
     QList<QUrl> getSongUrlsFromDialog();
-    void setMetaData(QList<AudioMedia> &songs);
+    QVariantList getMetaData(QUrl song);
 };
 
 #endif // MAINWINDOW_H

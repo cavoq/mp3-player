@@ -8,12 +8,14 @@ class AudioPlaylist : public QMediaPlaylist
 {
 public:
     explicit AudioPlaylist(QObject *parent = nullptr);
-    bool addMedia(const AudioMedia &audioContent);
+    bool addMedia(AudioMedia audioContent);
     AudioMedia media(int index) const;
-    QList<AudioMedia> &getMediaContent();
+    AudioMedia currentAudio();
+    int mediaCount() const;
+    QList<AudioMedia> &getAudioContent();
 
 private:
-    QList<AudioMedia> mediaContent = QList<AudioMedia>();
+    QList<AudioMedia> audioContent;
 };
 
 #endif // AUDIOPLAYLIST_H

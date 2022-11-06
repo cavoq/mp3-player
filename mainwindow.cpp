@@ -1,12 +1,17 @@
 #include "mainwindow.h"
 #include "audiomedia.h"
 #include "ui_mainwindow.h"
+#include <chrono>
+#include <thread>
 
 #include <QFileDialog>
 #include <QMediaMetaData>
 #include <QAudioOutput>
+#include <QTime>
+#include <taglib/taglib.h>
+#include <taglib/fileref.h>
 
-int LOAD_INDEX = 0;
+qint64 FORWARD_STEP = 15000;
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
@@ -16,8 +21,18 @@ MainWindow::MainWindow(QWidget *parent)
     setIcons();
     player = new QMediaPlayer(this);
     connect(ui->loadPlaylistButton, SIGNAL(clicked()), this, SLOT(loadPlaylist()));
+    connect(ui->playStopButton, SIGNAL(toggled(bool)), this, SLOT(switchPlaying(bool)));
+    connect(ui->muteButton, SIGNAL(toggled(bool)), this, SLOT(switchMute(bool)));
+    connect(ui->fastForwardButton, SIGNAL(clicked()), this, SLOT(fastForward()));
+    connect(ui->rewindButton, SIGNAL(clicked()), this, SLOT(rewind()));
+    connect(ui->stopButton, SIGNAL(clicked()), player, SLOT(stop()));
+    connect(ui->songSlider, SIGNAL(sliderPressed()), player, SLOT(pause()));
+    connect(ui->songSlider, SIGNAL(sliderReleased()), this, SLOT(onSongSliderReleased()));
+    connect(ui->soundVolumeSlider, SIGNAL(sliderMoved(int)), player, SLOT(setVolume(int)));
+    connect(player, SIGNAL(volumeChanged(int)), this, SLOT(onVolumeChanged(int)));
+    connect(player, SIGNAL(durationChanged(qint64)), this,  SLOT(onDurationChanged(qint64)));
+    connect(player, SIGNAL(positionChanged(qint64)), this, SLOT(onPositionChanged(qint64)));
     connect(player, SIGNAL(mediaStatusChanged(QMediaPlayer::MediaStatus)), this, SLOT(onMediaStatusChanged(QMediaPlayer::MediaStatus)));
-    connect(player, SIGNAL(metaDataChanged()), this, SLOT(onMetaDataChanged()));
 }
 
 MainWindow::~MainWindow()
@@ -31,9 +46,92 @@ void MainWindow::setIcons()
     ui->fastForwardButton->setIcon(QIcon(":/icons/fastForward.png"));
     ui->lastSongButton->setIcon(QIcon(":/icons/last.png"));
     ui->nextSongButton->setIcon(QIcon(":/icons/next.png"));
-    ui->muteButton->setIcon(QIcon(":/icons/mute.png"));
+    ui->muteButton->setIcon(QIcon(":/icons/sound.png"));
     ui->stopButton->setIcon(QIcon(":/icons/stop.png"));
     ui->playStopButton->setIcon(QIcon(":/icons/resumePlaying.png"));
+}
+
+void MainWindow::fastForward()
+{
+    qint64 currentPosition = player->position();
+    setPosition(currentPosition + FORWARD_STEP);
+}
+
+void MainWindow::rewind()
+{
+    qint64 currentPosition = player->position();
+    player->setPosition(currentPosition - FORWARD_STEP);
+}
+
+void MainWindow::onSongSliderReleased()
+{
+    setPosition(ui->songSlider->sliderPosition());
+    player->play();
+}
+
+void MainWindow::setPosition(qint64 position)
+{
+    if (position < 0) {
+        position = 0;
+    }
+    if (position > player->duration()) {
+        position = player->duration();
+    }
+    player->setPosition(position);
+}
+
+void MainWindow::onVolumeChanged(int volume)
+{
+    if (volume < 0 || volume > 100) {
+        return;
+    }
+    ui->soundVolumeSlider->setSliderPosition(volume);
+}
+
+void MainWindow::onDurationChanged(qint64 duration)
+{
+    setTimeLabel(ui->durationLabel, duration);
+    ui->songSlider->setMaximum(duration);
+}
+
+void MainWindow::onPositionChanged(qint64 position)
+{
+    setTimeLabel(ui->positionLabel, position);
+    ui->songSlider->setSliderPosition(position);
+}
+
+void MainWindow::setTimeLabel(QLabel *label, qint64 timeInMs)
+{
+    QString timeAsString = QDateTime::fromTime_t(long (timeInMs / 1000)).toUTC().toString("m:ss");
+    label->setText(timeAsString);
+}
+
+void MainWindow::switchMute(bool muted)
+{
+    if (!muted) {
+        switchButton(ui->muteButton, QIcon(":/icons/sound"), "Stummschaltung aufheben");
+        player->setMuted(false);
+        return;
+    }
+    switchButton(ui->muteButton, QIcon(":/icons/mute"), "Stummschalten");
+    player->setMuted(true);
+}
+
+void MainWindow::switchPlaying(bool playing)
+{
+    if (!playing) {
+        switchButton(ui->playStopButton, QIcon(":/icons/resumePlaying"), "Song wiedergeben");
+        player->pause();
+        return;
+    }
+    switchButton(ui->playStopButton, QIcon(":/icons/playing"), "Wiedergabe stoppen");
+    player->play();
+}
+
+void MainWindow::switchButton(QToolButton *button, QIcon icon, QString tooltip)
+{
+    button->setIcon(icon);
+    button->setToolTip(tooltip);
 }
 
 void MainWindow::loadPlaylist()
@@ -44,8 +142,10 @@ void MainWindow::loadPlaylist()
         playlist->addMedia(AudioMedia(songUrls[i]));
     }
     playlistTableModel = new PlaylistTableModel(playlist, this);
-    ui->tableView->setModel(playlistTableModel);
-    setMetaData(playlist->getMediaContent());
+    ui->playlistTableView->setModel(playlistTableModel);
+    for (int i = 0; i < songUrls.count(); ++i) {
+        playlistTableModel->setRowData(playlistTableModel->getIndexesOfRow(i), getMetaData(songUrls[i]));
+    }
 }
 
 QList<QUrl> MainWindow::getSongUrlsFromDialog()
@@ -54,33 +154,26 @@ QList<QUrl> MainWindow::getSongUrlsFromDialog()
     return songUrls;
 }
 
-void MainWindow::setMetaData(QList<AudioMedia> &songs)
+QVariantList MainWindow::getMetaData(QUrl songUrl)
 {
-    for (int i = 0; i < songs.count(); ++i) {
-        player->setMedia(songs[i]);
-        player->setPlaylist(playlistTableModel->getPlaylist());
-        player->play();
-    }
+    TagLib::FileRef file = TagLib::FileRef(songUrl.path().toStdString().c_str());
+    QVariantList metaData;
+    const QVariant title = QVariant(file.tag()->title().toCString());
+    const QVariant artist = QVariant(file.tag()->artist().toCString());
+    const QVariant album = QVariant(file.tag()->album().toCString());
+    const QVariant length = QDateTime::fromTime_t(long (file.audioProperties()->lengthInMilliseconds() / 1000)).toUTC().toString("m:ss");
+    const QVariant genre = QVariant(file.tag()->genre().toCString());
+    metaData << title << artist << album << length << genre;
+    return metaData;
 }
 
 void MainWindow::onMediaStatusChanged(QMediaPlayer::MediaStatus status)
 {
     if (status == QMediaPlayer::MediaStatus::LoadedMedia) {
-        QVariantList metaData;
-        const QVariant title = player->metaData(QMediaMetaData::Title);
-        const QVariant artist = player->metaData(QMediaMetaData::ContributingArtist);
-        const QVariant album = player->metaData(QMediaMetaData::AlbumTitle);
-        const QVariant length = player->metaData(QMediaMetaData::Duration);
-        const QVariant genre = player->metaData(QMediaMetaData::Genre);
-        metaData << title << artist << album << length << genre;
-        qInfo()<<metaData;
-        playlistTableModel->setRowData(playlistTableModel->getIndexesOfRow(LOAD_INDEX), metaData);
-        LOAD_INDEX += 1;
+
     }
 }
 
 void MainWindow::onMetaDataChanged()
 {
-    qInfo()<<player->availableMetaData();
-    qInfo()<<player->metaData(QMediaMetaData::Duration);
 }

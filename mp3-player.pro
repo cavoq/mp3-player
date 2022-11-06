@@ -32,3 +32,17 @@ else: unix:!android: target.path = /opt/$${TARGET}/bin
 
 RESOURCES += \
     icons.qrc
+
+win32:CONFIG(release, debug|release): LIBS += -L$$PWD/../../../usr/local/lib/release/ -ltag
+else:win32:CONFIG(debug, debug|release): LIBS += -L$$PWD/../../../usr/local/lib/debug/ -ltag
+else:unix: LIBS += -L$$PWD/../../../usr/local/lib/ -ltag
+LIBS += -lz
+
+INCLUDEPATH += $$PWD/../../../usr/local/include/taglib
+DEPENDPATH += $$PWD/../../../usr/local/include/taglib
+
+win32-g++:CONFIG(release, debug|release): PRE_TARGETDEPS += $$PWD/../../../usr/local/lib/release/libtag.a
+else:win32-g++:CONFIG(debug, debug|release): PRE_TARGETDEPS += $$PWD/../../../usr/local/lib/debug/libtag.a
+else:win32:!win32-g++:CONFIG(release, debug|release): PRE_TARGETDEPS += $$PWD/../../../usr/local/lib/release/tag.lib
+else:win32:!win32-g++:CONFIG(debug, debug|release): PRE_TARGETDEPS += $$PWD/../../../usr/local/lib/debug/tag.lib
+else:unix: PRE_TARGETDEPS += $$PWD/../../../usr/local/lib/libtag.a

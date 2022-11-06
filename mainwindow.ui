@@ -14,7 +14,10 @@
    <string>MP3 - Player</string>
   </property>
   <widget class="QWidget" name="centralwidget">
-   <widget class="QTableView" name="tableView">
+   <widget class="QTableView" name="playlistTableView">
+    <property name="enabled">
+     <bool>true</bool>
+    </property>
     <property name="geometry">
      <rect>
       <x>30</x>
@@ -23,14 +26,29 @@
       <height>251</height>
      </rect>
     </property>
+    <property name="acceptDrops">
+     <bool>true</bool>
+    </property>
     <property name="sizeAdjustPolicy">
      <enum>QAbstractScrollArea::AdjustToContents</enum>
     </property>
+    <property name="editTriggers">
+     <set>QAbstractItemView::AnyKeyPressed|QAbstractItemView::DoubleClicked|QAbstractItemView::EditKeyPressed</set>
+    </property>
+    <property name="dragEnabled">
+     <bool>true</bool>
+    </property>
+    <property name="dragDropOverwriteMode">
+     <bool>false</bool>
+    </property>
     <property name="dragDropMode">
-     <enum>QAbstractItemView::DragDrop</enum>
+     <enum>QAbstractItemView::InternalMove</enum>
     </property>
     <property name="defaultDropAction">
-     <enum>Qt::TargetMoveAction</enum>
+     <enum>Qt::MoveAction</enum>
+    </property>
+    <property name="alternatingRowColors">
+     <bool>true</bool>
     </property>
     <property name="selectionMode">
      <enum>QAbstractItemView::SingleSelection</enum>
@@ -38,8 +56,17 @@
     <property name="selectionBehavior">
      <enum>QAbstractItemView::SelectRows</enum>
     </property>
+    <property name="textElideMode">
+     <enum>Qt::ElideRight</enum>
+    </property>
+    <property name="gridStyle">
+     <enum>Qt::NoPen</enum>
+    </property>
+    <property name="sortingEnabled">
+     <bool>true</bool>
+    </property>
     <attribute name="horizontalHeaderShowSortIndicator" stdset="0">
-     <bool>false</bool>
+     <bool>true</bool>
     </attribute>
     <attribute name="horizontalHeaderStretchLastSection">
      <bool>true</bool>
@@ -154,7 +181,7 @@
      </rect>
     </property>
     <property name="toolTip">
-     <string>Song abspielen</string>
+     <string>Song wiedergeben</string>
     </property>
     <property name="text">
      <string>play/stop</string>
@@ -163,7 +190,7 @@
      <bool>true</bool>
     </property>
    </widget>
-   <widget class="QLabel" name="currentTimeLabel">
+   <widget class="QLabel" name="positionLabel">
     <property name="geometry">
      <rect>
       <x>80</x>
@@ -176,7 +203,7 @@
      <string>0:00</string>
     </property>
    </widget>
-   <widget class="QLabel" name="currentTimeLabel_2">
+   <widget class="QLabel" name="durationLabel">
     <property name="geometry">
      <rect>
       <x>480</x>
@@ -280,10 +307,13 @@
      </rect>
     </property>
     <property name="toolTip">
-     <string>Stumm schalten</string>
+     <string>Stummschalten</string>
     </property>
     <property name="text">
      <string>Stumm</string>
+    </property>
+    <property name="checkable">
+     <bool>true</bool>
     </property>
    </widget>
    <widget class="QPushButton" name="loadPlaylistButton">

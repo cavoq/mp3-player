@@ -15,7 +15,6 @@ public:
     QString album;
     QString length;
     QString genre;
-    void setMetaData(QString titel, QString artist, QString album, QString length, QString genre);
 };
 
 #endif // AUDIOMEDIA_H

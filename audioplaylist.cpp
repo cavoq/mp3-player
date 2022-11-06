@@ -1,10 +1,10 @@
 #include "audioplaylist.h"
 
-AudioPlaylist::AudioPlaylist(QObject *parent): QMediaPlaylist{parent} {}
+AudioPlaylist::AudioPlaylist(QObject *parent): QMediaPlaylist(parent) {}
 
-bool AudioPlaylist::addMedia(const AudioMedia &audioContent)
+bool AudioPlaylist::addMedia(AudioMedia audioContent)
 {
-    this->mediaContent.append(audioContent);
+    this->audioContent.append(audioContent);
     if (!QMediaPlaylist::addMedia(audioContent)) {
         return false;
     }
@@ -13,10 +13,21 @@ bool AudioPlaylist::addMedia(const AudioMedia &audioContent)
 
 AudioMedia AudioPlaylist::media(int index) const
 {
-    return this->mediaContent.at(index);
+    return this->audioContent.at(index);
 }
 
-QList<AudioMedia> &AudioPlaylist::getMediaContent()
+QList<AudioMedia> &AudioPlaylist::getAudioContent()
 {
-    return this->mediaContent;
+    return this->audioContent;
+}
+
+int AudioPlaylist::mediaCount() const
+{
+    return this->audioContent.count();
+}
+
+AudioMedia AudioPlaylist::currentAudio()
+{
+    int currentIndex = QMediaPlaylist::currentIndex();
+    return this->audioContent.at(currentIndex);
 }

@@ -88,6 +88,8 @@ bool PlaylistTableModel::setData(const QModelIndex &index, const QVariant &value
             default:
                 return false;
         }
+
+        this->playlist->getAudioContent().replace(row, song);
         emit dataChanged(index, index, {Qt::DisplayRole, Qt::EditRole});
         return true;
     }
@@ -99,10 +101,6 @@ bool PlaylistTableModel::setRowData(const QModelIndexList &indexes, const QVaria
 {
     if (indexes.count() != values.count()) {
         return false;
-    }
-
-    for (int i = 0; i < values.count(); ++i) {
-        qInfo()<<values;
     }
     for (int i = 0; i < values.count(); ++i) {
         if (!setData(indexes[i], values[i], role)) {
@@ -122,6 +120,7 @@ QVariant PlaylistTableModel::data(const QModelIndex &index, int role) const
 
     if (role == Qt::DisplayRole) {
         AudioMedia song = this->playlist->media(index.row());
+
         switch (index.column()) {
             case 0:
                 return song.titel;
