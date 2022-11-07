@@ -65,6 +65,9 @@
     <property name="sortingEnabled">
      <bool>true</bool>
     </property>
+    <attribute name="horizontalHeaderHighlightSections">
+     <bool>false</bool>
+    </attribute>
     <attribute name="horizontalHeaderShowSortIndicator" stdset="0">
      <bool>true</bool>
     </attribute>
@@ -200,7 +203,7 @@
      </rect>
     </property>
     <property name="text">
-     <string>0:00</string>
+     <string/>
     </property>
    </widget>
    <widget class="QLabel" name="durationLabel">
@@ -213,33 +216,33 @@
      </rect>
     </property>
     <property name="text">
-     <string>2:34</string>
+     <string/>
     </property>
    </widget>
    <widget class="QLabel" name="songNameLabel">
     <property name="geometry">
      <rect>
-      <x>130</x>
+      <x>190</x>
       <y>370</y>
       <width>71</width>
       <height>16</height>
      </rect>
     </property>
     <property name="text">
-     <string>songName</string>
+     <string/>
     </property>
    </widget>
    <widget class="QLabel" name="interpretLabel">
     <property name="geometry">
      <rect>
-      <x>390</x>
+      <x>350</x>
       <y>370</y>
       <width>71</width>
       <height>16</height>
      </rect>
     </property>
     <property name="text">
-     <string>interpret</string>
+     <string/>
     </property>
    </widget>
    <widget class="QToolButton" name="stopButton">
@@ -326,7 +329,7 @@
      </rect>
     </property>
     <property name="text">
-     <string>Songs laden</string>
+     <string>Playlist laden</string>
     </property>
    </widget>
   </widget>
@@ -339,8 +342,38 @@
      <height>20</height>
     </rect>
    </property>
+   <widget class="QMenu" name="menuInfo">
+    <property name="title">
+     <string>Shortcuts</string>
+    </property>
+    <addaction name="actionPlaylist_laden_Strg_O"/>
+    <addaction name="actionZur_ckspulen_Vorspulen_Strg_Strg"/>
+    <addaction name="actionLetzter_Song_N_chster_Song_Strg_L_Strg_N"/>
+    <addaction name="actionWiedergabe_anhalten_fortsetzen_Leertaste"/>
+   </widget>
+   <addaction name="menuInfo"/>
   </widget>
   <widget class="QStatusBar" name="statusbar"/>
+  <action name="actionPlaylist_laden_Strg_O">
+   <property name="text">
+    <string>Playlist laden (Strg + O)</string>
+   </property>
+  </action>
+  <action name="actionZur_ckspulen_Vorspulen_Strg_Strg">
+   <property name="text">
+    <string>Zurückspulen / Vorspulen (Strg + &lt;- / Strg + -&gt;)</string>
+   </property>
+  </action>
+  <action name="actionLetzter_Song_N_chster_Song_Strg_L_Strg_N">
+   <property name="text">
+    <string>Letzter Song / Nächster Song (Strg + L / Strg + N)</string>
+   </property>
+  </action>
+  <action name="actionWiedergabe_anhalten_fortsetzen_Leertaste">
+   <property name="text">
+    <string>Wiedergabe anhalten / fortsetzen (Leertaste)</string>
+   </property>
+  </action>
  </widget>
  <resources/>
  <connections/>

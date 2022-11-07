@@ -1,15 +1,19 @@
 #include "mainwindow.h"
 #include "audiomedia.h"
 #include "ui_mainwindow.h"
-#include <chrono>
-#include <thread>
+#include <random>
 
 #include <QFileDialog>
 #include <QMediaMetaData>
 #include <QAudioOutput>
 #include <QTime>
+#include <QShortcut>
+
 #include <taglib/taglib.h>
 #include <taglib/fileref.h>
+
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wunused-parameter"
 
 qint64 FORWARD_STEP = 15000;
 
@@ -20,20 +24,9 @@ MainWindow::MainWindow(QWidget *parent)
     ui->setupUi(this);
     setIcons();
     player = new QMediaPlayer(this);
-    connect(ui->loadPlaylistButton, SIGNAL(clicked()), this, SLOT(loadPlaylist()));
-    connect(ui->playStopButton, SIGNAL(toggled(bool)), this, SLOT(switchPlaying(bool)));
-    connect(ui->muteButton, SIGNAL(toggled(bool)), this, SLOT(switchMute(bool)));
-    connect(ui->fastForwardButton, SIGNAL(clicked()), this, SLOT(fastForward()));
-    connect(ui->rewindButton, SIGNAL(clicked()), this, SLOT(rewind()));
-    connect(ui->stopButton, SIGNAL(clicked()), player, SLOT(stop()));
-    connect(ui->songSlider, SIGNAL(sliderPressed()), player, SLOT(pause()));
-    connect(ui->songSlider, SIGNAL(sliderReleased()), this, SLOT(onSongSliderReleased()));
-    connect(ui->soundVolumeSlider, SIGNAL(sliderMoved(int)), player, SLOT(setVolume(int)));
-    connect(player, SIGNAL(currentMediaChanged(QMediaContent)), this, SLOT(onCurrentMediaChanged(QMediaContent)));
-    connect(player, SIGNAL(volumeChanged(int)), this, SLOT(onVolumeChanged(int)));
-    connect(player, SIGNAL(durationChanged(qint64)), this,  SLOT(onDurationChanged(qint64)));
-    connect(player, SIGNAL(positionChanged(qint64)), this, SLOT(onPositionChanged(qint64)));
-    connect(player, SIGNAL(mediaStatusChanged(QMediaPlayer::MediaStatus)), this, SLOT(onMediaStatusChanged(QMediaPlayer::MediaStatus)));
+    filterProxyModel = new QSortFilterProxyModel(this);
+    connectSignals();
+    createShortcuts();
 }
 
 MainWindow::~MainWindow()
@@ -50,6 +43,43 @@ void MainWindow::setIcons()
     ui->muteButton->setIcon(QIcon(":/icons/sound.png"));
     ui->stopButton->setIcon(QIcon(":/icons/stop.png"));
     ui->playStopButton->setIcon(QIcon(":/icons/resumePlaying.png"));
+}
+
+void MainWindow::connectSignals()
+{
+    connect(ui->loadPlaylistButton, SIGNAL(clicked()), this, SLOT(loadPlaylist()));
+    connect(ui->playStopButton, SIGNAL(toggled(bool)), this, SLOT(switchPlaying(bool)));
+    connect(ui->muteButton, SIGNAL(toggled(bool)), this, SLOT(switchMute(bool)));
+    connect(ui->fastForwardButton, SIGNAL(clicked()), this, SLOT(fastForward()));
+    connect(ui->rewindButton, SIGNAL(clicked()), this, SLOT(rewind()));
+    connect(ui->stopButton, SIGNAL(clicked()), this, SLOT(stopSong()));
+    connect(ui->songSlider, SIGNAL(sliderPressed()), player, SLOT(pause()));
+    connect(ui->songSlider, SIGNAL(sliderReleased()), this, SLOT(onSongSliderReleased()));
+    connect(ui->soundVolumeSlider, SIGNAL(sliderMoved(int)), player, SLOT(setVolume(int)));
+    connect(ui->songSearchLineEdit, SIGNAL(textChanged(QString)), this, SLOT(searchSong(QString)));
+    connect(player, SIGNAL(currentMediaChanged(QMediaContent)), this, SLOT(onCurrentMediaChanged(QMediaContent)));
+    connect(player, SIGNAL(volumeChanged(int)), this, SLOT(onVolumeChanged(int)));
+    connect(player, SIGNAL(durationChanged(qint64)), this,  SLOT(onDurationChanged(qint64)));
+    connect(player, SIGNAL(positionChanged(qint64)), this, SLOT(onPositionChanged(qint64)));
+}
+
+void MainWindow::createShortcuts()
+{
+    QList<QShortcut*> shortcuts;
+    shortcuts.append(new QShortcut(QKeySequence(Qt::CTRL + Qt::Key_O), this, SLOT(loadPlaylist())));
+    shortcuts.append(new QShortcut(QKeySequence(Qt::Key_Space), this, SLOT(switchPlaying())));
+    shortcuts.append(new QShortcut(QKeySequence(Qt::CTRL + Qt::Key_N), this, SLOT(nextSong())));
+    shortcuts.append(new QShortcut(QKeySequence(Qt::CTRL + Qt::Key_L), this, SLOT(previousSong())));
+    shortcuts.append(new QShortcut(QKeySequence(Qt::CTRL + Qt::Key_Right), this, SLOT(fastForward())));
+    shortcuts.append(new QShortcut(QKeySequence(Qt::CTRL + Qt::Key_Left), this, SLOT(rewind())));
+    for (int i = 0; i < shortcuts.count() - 2; ++i) {
+        shortcuts[i]->setAutoRepeat(false);
+    }
+}
+
+void MainWindow::switchPlaying()
+{
+    ui->playStopButton->setChecked(!ui->playStopButton->isChecked());
 }
 
 void MainWindow::fastForward()
@@ -146,18 +176,42 @@ void MainWindow::switchButton(QToolButton *button, QIcon icon, QString tooltip)
 void MainWindow::loadPlaylist()
 {
     QList<QUrl> songUrls = getSongUrlsFromDialog();
+    if (songUrls.empty()) {
+        return;
+    }
     AudioPlaylist *playlist = new AudioPlaylist();
+    playlistTableModel = new PlaylistTableModel(playlist, this);
     for (int i = 0; i < songUrls.count(); ++i) {
         playlist->addMedia(AudioMedia(songUrls[i]));
-    }
-    playlistTableModel = new PlaylistTableModel(playlist, this);
-    ui->playlistTableView->setModel(playlistTableModel);
-    for (int i = 0; i < songUrls.count(); ++i) {
         playlistTableModel->setRowData(playlistTableModel->getIndexesOfRow(i), getMetaData(songUrls[i]));
-    }
+    };
+    filterProxyModel->setSourceModel(playlistTableModel);
+    ui->playlistTableView->setModel(filterProxyModel);
     player->setPlaylist(playlist);
     connect(ui->nextSongButton, SIGNAL(clicked()), this, SLOT(nextSong()));
     connect(ui->lastSongButton, SIGNAL(clicked()), this, SLOT(previousSong()));
+    connect(ui->randomSongButton, SIGNAL(clicked()), this, SLOT(randomSong()));
+}
+
+void MainWindow::stopSong()
+{
+    player->stop();
+    ui->playStopButton->setChecked(false);
+}
+
+void MainWindow::searchSong(QString titel)
+{
+    filterProxyModel->setFilterKeyColumn(0);
+    filterProxyModel->setFilterFixedString(titel);
+    filterProxyModel->filterKeyColumn();
+}
+
+void MainWindow::randomSong()
+{
+    std::random_device randomHardwareNumber;
+    std::mt19937 seedGenerator(randomHardwareNumber());
+    std::uniform_int_distribution<> distribution(0,  player->playlist()->mediaCount() - 1);
+    player->playlist()->setCurrentIndex(distribution(seedGenerator));
 }
 
 void MainWindow::nextSong()
@@ -195,16 +249,4 @@ QVariantList MainWindow::getMetaData(QUrl songUrl)
     const QVariant genre = QVariant(file.tag()->genre().toCString());
     metaData << title << artist << album << length << genre;
     return metaData;
-}
-
-void MainWindow::onMediaStatusChanged(QMediaPlayer::MediaStatus status)
-{
-    if (status == QMediaPlayer::MediaStatus::LoadedMedia) {
-        ui->songNameLabel->setText(playlistTableModel->getPlaylist()->currentAudio().titel);
-        ui->interpretLabel->setText(playlistTableModel->getPlaylist()->currentAudio().artist);
-    }
-}
-
-void MainWindow::onMetaDataChanged()
-{
 }

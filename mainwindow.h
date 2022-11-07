@@ -7,6 +7,7 @@
 #include <QMainWindow>
 #include <QMediaPlayer>
 #include <QMediaPlaylist>
+#include <QSortFilterProxyModel>
 
 QT_BEGIN_NAMESPACE
 namespace Ui { class MainWindow; }
@@ -19,6 +20,7 @@ class MainWindow : public QMainWindow
 public slots:
     void loadPlaylist();
     void switchPlaying(bool playing);
+    void switchPlaying();
     void switchMute(bool muted);
     void onDurationChanged(qint64 duration);
     void onPositionChanged(qint64 position);
@@ -26,11 +28,12 @@ public slots:
     void onCurrentMediaChanged(QMediaContent currentMedia);
     void fastForward();
     void rewind();
+    void stopSong();
+    void searchSong(QString titel);
     void nextSong();
     void previousSong();
+    void randomSong();
     void onSongSliderReleased();
-    void onMediaStatusChanged(QMediaPlayer::MediaStatus status);
-    void onMetaDataChanged();
 
 public:
     MainWindow(QWidget *parent = nullptr);
@@ -40,7 +43,10 @@ private:
     Ui::MainWindow *ui;
     PlaylistTableModel *playlistTableModel;
     QMediaPlayer *player;
+    QSortFilterProxyModel *filterProxyModel;
     void setIcons();
+    void connectSignals();
+    void createShortcuts();
     void setTimeLabel(QLabel *label, qint64 timeInMs);
     void setPosition(qint64 position);
     void switchButton(QToolButton *button, QIcon icon, QString tooltip);
