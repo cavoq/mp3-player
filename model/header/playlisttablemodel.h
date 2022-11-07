@@ -3,7 +3,7 @@
 
 #include <QAbstractTableModel>
 #include <QMediaPlaylist>
-#include "audioplaylist.h"
+#include "model/header/audioplaylist.h"
 
 class PlaylistTableModel : public QAbstractTableModel
 {

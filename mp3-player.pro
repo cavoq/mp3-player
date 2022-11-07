@@ -10,20 +10,20 @@ CONFIG += c++17
 #DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs deprecated before Qt 6.0.0
 
 SOURCES += \
-    audiomedia.cpp \
-    audioplaylist.cpp \
+    model/src/audiomedia.cpp \
+    model/src/audioplaylist.cpp \
     main.cpp \
-    mainwindow.cpp \
-    playlisttablemodel.cpp
+    view/src/mainwindow.cpp \
+    model/src/playlisttablemodel.cpp
 
 HEADERS += \
-    audiomedia.h \
-    audioplaylist.h \
-    mainwindow.h \
-    playlisttablemodel.h
+    model/header/audiomedia.h \
+    model/header/audioplaylist.h \
+    view/header/mainwindow.h \
+    model/header/playlisttablemodel.h
 
 FORMS += \
-    mainwindow.ui
+    view/ui/mainwindow.ui
 
 # Default rules for deployment.
 qnx: target.path = /tmp/$${TARGET}/bin
@@ -31,7 +31,7 @@ else: unix:!android: target.path = /opt/$${TARGET}/bin
 !isEmpty(target.path): INSTALLS += target
 
 RESOURCES += \
-    icons.qrc
+    ressources/icons.qrc
 
 win32:CONFIG(release, debug|release): LIBS += -L$$PWD/../../../usr/local/lib/release/ -ltag
 else:win32:CONFIG(debug, debug|release): LIBS += -L$$PWD/../../../usr/local/lib/debug/ -ltag

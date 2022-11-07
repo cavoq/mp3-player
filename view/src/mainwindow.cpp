@@ -1,5 +1,5 @@
-#include "mainwindow.h"
-#include "audiomedia.h"
+#include "view/header/mainwindow.h"
+#include "model/header/audiomedia.h"
 #include "ui_mainwindow.h"
 #include <random>
 

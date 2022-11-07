@@ -1,7 +1,7 @@
 #ifndef AUDIOPLAYLIST_H
 #define AUDIOPLAYLIST_H
 
-#include "audiomedia.h"
+#include "model/header/audiomedia.h"
 #include <QMediaPlaylist>
 
 class AudioPlaylist : public QMediaPlaylist

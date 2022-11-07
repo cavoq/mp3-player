@@ -1,4 +1,4 @@
-#include "audioplaylist.h"
+#include "model/header/audioplaylist.h"
 
 AudioPlaylist::AudioPlaylist(QObject *parent): QMediaPlaylist(parent) {}
 

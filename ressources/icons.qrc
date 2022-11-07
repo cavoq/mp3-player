@@ -9,5 +9,9 @@
         <file>icons/playing.png</file>
         <file>icons/resumePlaying.png</file>
         <file>icons/stop.png</file>
+        <file>test/BONEZ MC - ANGEKLAGT.mp3</file>
+        <file>test/Musso - Raus (prod. Nikho) [Official Video] 4k.mp3</file>
+        <file>test/Musso - Später.mp3</file>
+        <file>icons.qrc</file>
     </qresource>
 </RCC>

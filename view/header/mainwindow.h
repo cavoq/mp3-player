@@ -1,7 +1,7 @@
 #ifndef MAINWINDOW_H
 #define MAINWINDOW_H
 
-#include "playlisttablemodel.h"
+#include "model/header/playlisttablemodel.h"
 #include "qlabel.h"
 #include "qtoolbutton.h"
 #include <QMainWindow>

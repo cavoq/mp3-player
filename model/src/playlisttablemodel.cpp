@@ -1,7 +1,5 @@
-#include "playlisttablemodel.h"
-#include "audiomedia.h"
-#include <iostream>
-#include <ostream>
+#include "model/header/playlisttablemodel.h"
+#include "model/header/audiomedia.h"
 
 PlaylistTableModel::PlaylistTableModel(AudioPlaylist *playlist, QObject *parent) : QAbstractTableModel{parent}, playlist(playlist) {}
 
