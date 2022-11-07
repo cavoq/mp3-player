@@ -111,6 +111,15 @@ void MainWindow::setPosition(qint64 position)
     player->setPosition(position);
 }
 
+void MainWindow::onCurrentSelectionChanged(const QItemSelection &current, const QItemSelection &previous)
+{
+    if (current.indexes().isDetached() || current.indexes().isEmpty()) {
+        return;
+    }
+    int row = current.indexes().at(0).row();
+    player->playlist()->setCurrentIndex(row);
+}
+
 void MainWindow::onVolumeChanged(int volume)
 {
     if (volume < 0 || volume > 100) {
@@ -137,6 +146,7 @@ void MainWindow::onCurrentMediaChanged(QMediaContent currentMedia)
     ui->playlistTableView->selectRow(currentIndex);
     ui->songNameLabel->setText(playlistTableModel->getPlaylist()->currentAudio().titel);
     ui->interpretLabel->setText(playlistTableModel->getPlaylist()->currentAudio().artist);
+    player->play();
 }
 
 void MainWindow::setTimeLabel(QLabel *label, qint64 timeInMs)
@@ -191,6 +201,8 @@ void MainWindow::loadPlaylist()
     connect(ui->nextSongButton, SIGNAL(clicked()), this, SLOT(nextSong()));
     connect(ui->lastSongButton, SIGNAL(clicked()), this, SLOT(previousSong()));
     connect(ui->randomSongButton, SIGNAL(clicked()), this, SLOT(randomSong()));
+    connect(ui->playlistTableView->selectionModel(), SIGNAL(selectionChanged(QItemSelection,QItemSelection)),
+            this, SLOT(onCurrentSelectionChanged(QItemSelection,QItemSelection)));
 }
 
 void MainWindow::stopSong()

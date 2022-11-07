@@ -87,6 +87,7 @@ bool PlaylistTableModel::setData(const QModelIndex &index, const QVariant &value
                 return false;
         }
 
+        this->playlist->media(row) = song;
         this->playlist->getAudioContent().replace(row, song);
         emit dataChanged(index, index, {Qt::DisplayRole, Qt::EditRole});
         return true;
@@ -144,6 +145,57 @@ QModelIndexList PlaylistTableModel::getIndexesOfRow(int row)
         indexes.append(index(row, column));
     }
     return indexes;
+}
+
+Qt::ItemFlags PlaylistTableModel::flags(const QModelIndex &index) const
+{
+    Qt::ItemFlags flags = Qt::ItemIsEnabled | Qt::ItemIsSelectable | Qt::ItemIsDragEnabled;
+
+        if(!index.isValid()) {
+            flags |= Qt::ItemIsDropEnabled;
+        }
+
+        return flags;
+}
+
+Qt::DropActions PlaylistTableModel::supportedDropActions() const
+{
+    return Qt::MoveAction;
+}
+
+bool PlaylistTableModel::moveRows(const QModelIndex &srcParent, int srcRow, int count,
+                                  const QModelIndex &dstParent, int dstChild)
+{
+    beginMoveRows(srcParent, srcRow, srcRow + count - 1, dstParent, dstChild);
+    for(int i = 0; i<count; ++i) {
+        playlist->getAudioContent().insert(dstChild + i, playlist->getAudioContent()[srcRow]);
+        int removeIndex = dstChild > srcRow ? srcRow : srcRow +1;
+        playlist->getAudioContent().removeAt(removeIndex);
+    }
+    endMoveRows();
+    return true;
+}
+
+bool PlaylistTableModel::setItemData(const QModelIndex &index, const QMap<int, QVariant> &roles)
+{
+    if(!roles.contains(Qt::EditRole) && !roles.contains(Qt::DisplayRole)) {
+        return false;
+    }
+
+    setData(index, roles[Qt::DisplayRole]);
+    return true;
+}
+
+bool PlaylistTableModel::dropMimeData(const QMimeData *data, Qt::DropAction action, int row, int column, const QModelIndex &parent)
+{
+    Q_UNUSED(parent);
+    Q_UNUSED(column);
+
+    if(row == -1) {
+        row = rowCount();
+    }
+
+    return QAbstractTableModel::dropMimeData(data, action, row, 0, parent);
 }
 
 AudioPlaylist *PlaylistTableModel::getPlaylist() const

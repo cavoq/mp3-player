@@ -25,6 +25,7 @@ public slots:
     void onDurationChanged(qint64 duration);
     void onPositionChanged(qint64 position);
     void onVolumeChanged(int volume);
+    void onCurrentSelectionChanged(const QItemSelection &current, const QItemSelection &previous);
     void onCurrentMediaChanged(QMediaContent currentMedia);
     void fastForward();
     void rewind();
