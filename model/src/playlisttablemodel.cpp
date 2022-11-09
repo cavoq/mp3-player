@@ -1,5 +1,6 @@
 #include "model/header/playlisttablemodel.h"
 #include "model/header/audiomedia.h"
+#include "playlistsorter.h"
 
 PlaylistTableModel::PlaylistTableModel(AudioPlaylist *playlist, QObject *parent) : QAbstractTableModel{parent}, playlist(playlist) {}
 
@@ -43,7 +44,7 @@ bool PlaylistTableModel::removeRows(int position, int rows, const QModelIndex &i
     beginRemoveRows(QModelIndex(), position, position + rows - 1);
 
     for (int row = 0; row < rows; ++row)
-        playlist->removeMedia(position);
+        playlist->removeMedia(row);
 
     endRemoveRows();
     return true;
@@ -65,7 +66,7 @@ bool PlaylistTableModel::setData(const QModelIndex &index, const QVariant &value
 {
     if (index.isValid() && role == Qt::EditRole) {
         const int row = index.row();
-        AudioMedia song = this->playlist->media(row);
+        AudioMedia song = this->playlist->audioMedia(row);
 
         switch (index.column()) {
             case 0:
@@ -87,7 +88,6 @@ bool PlaylistTableModel::setData(const QModelIndex &index, const QVariant &value
                 return false;
         }
 
-        this->playlist->media(row) = song;
         this->playlist->getAudioContent().replace(row, song);
         emit dataChanged(index, index, {Qt::DisplayRole, Qt::EditRole});
         return true;
@@ -118,7 +118,7 @@ QVariant PlaylistTableModel::data(const QModelIndex &index, int role) const
         return QVariant();
 
     if (role == Qt::DisplayRole) {
-        AudioMedia song = this->playlist->media(index.row());
+        AudioMedia song = this->playlist->audioMedia(index.row());
 
         switch (index.column()) {
             case 0:
@@ -135,6 +135,7 @@ QVariant PlaylistTableModel::data(const QModelIndex &index, int role) const
                 break;
         }
     }
+
     return QVariant();
 }
 
@@ -202,3 +203,12 @@ AudioPlaylist *PlaylistTableModel::getPlaylist() const
 {
     return this->playlist;
 }
+
+void PlaylistTableModel::sort(int column, Qt::SortOrder order)
+{
+    QList<AudioMedia> &audioList = playlist->getAudioContent();
+    std::sort(audioList.begin(), audioList.end(), PlaylistSorter(column, order));
+
+    emit dataChanged(this->index(0, 0), this->index(this->rowCount() - 1, this->columnCount() - 1));
+}
+

@@ -11,7 +11,7 @@ bool AudioPlaylist::addMedia(AudioMedia audioContent)
     return true;
 }
 
-AudioMedia AudioPlaylist::media(int index) const
+AudioMedia AudioPlaylist::audioMedia(int index) const
 {
     return this->audioContent.at(index);
 }
@@ -32,4 +32,26 @@ AudioMedia AudioPlaylist::currentAudio()
     return this->audioContent.at(currentIndex);
 }
 
+bool AudioPlaylist::removeMedia(int position)
+{
+    if (!QMediaPlaylist::removeMedia(position)) {
+        return false;
+    }
+    if (position > audioContent.size()) {
+        return false;
+    }
+    audioContent.removeAt(position);
+    return true;
+}
 
+bool AudioPlaylist::insertMedia(int position, const AudioMedia &audioMedia)
+{
+    if (!QMediaPlaylist::insertMedia(position, audioMedia)) {
+        return false;
+    }
+    if (position > audioContent.size()) {
+        return false;
+    }
+    audioContent.insert(position, audioMedia);
+    return true;
+}

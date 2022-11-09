@@ -13,12 +13,14 @@ SOURCES += \
     model/src/audiomedia.cpp \
     model/src/audioplaylist.cpp \
     main.cpp \
+    playlistsorter.cpp \
     view/src/mainwindow.cpp \
     model/src/playlisttablemodel.cpp
 
 HEADERS += \
     model/header/audiomedia.h \
     model/header/audioplaylist.h \
+    playlistsorter.h \
     view/header/mainwindow.h \
     model/header/playlisttablemodel.h
 

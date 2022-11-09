@@ -25,8 +25,8 @@ public slots:
     void onDurationChanged(qint64 duration);
     void onPositionChanged(qint64 position);
     void onVolumeChanged(int volume);
-    void onCurrentSelectionChanged(const QItemSelection &current, const QItemSelection &previous);
-    void onCurrentMediaChanged(QMediaContent currentMedia);
+    void onCurrentIndexChanged(int index);
+    void onCurrentSelectionChanged(const QModelIndex &selection);
     void fastForward();
     void rewind();
     void stopSong();
@@ -44,9 +44,8 @@ private:
     Ui::MainWindow *ui;
     PlaylistTableModel *playlistTableModel;
     QMediaPlayer *player;
-    QSortFilterProxyModel *filterProxyModel;
     void setIcons();
-    void connectSignals();
+    void createSignals();
     void createShortcuts();
     void setTimeLabel(QLabel *label, qint64 timeInMs);
     void setPosition(qint64 position);

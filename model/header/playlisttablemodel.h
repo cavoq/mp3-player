@@ -25,6 +25,7 @@ public:
     QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const override;
     QModelIndexList getIndexesOfRow(int row);
     AudioPlaylist *getPlaylist() const;
+    void sort(int column, Qt::SortOrder order = Qt::AscendingOrder) override;
     const int columnSize = 5;
 
 private:

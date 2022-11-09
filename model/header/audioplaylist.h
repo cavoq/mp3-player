@@ -9,9 +9,11 @@ class AudioPlaylist : public QMediaPlaylist
 public:
     explicit AudioPlaylist(QObject *parent = nullptr);
     bool addMedia(AudioMedia audioContent);
-    AudioMedia media(int index) const;
+    AudioMedia audioMedia(int index) const;
     AudioMedia currentAudio();
     int mediaCount() const;
+    bool removeMedia(int position);
+    bool insertMedia(int position, const AudioMedia &audioMedia);
     QList<AudioMedia> &getAudioContent();
 
 private:

@@ -24,8 +24,7 @@ MainWindow::MainWindow(QWidget *parent)
     ui->setupUi(this);
     setIcons();
     player = new QMediaPlayer(this);
-    filterProxyModel = new QSortFilterProxyModel(this);
-    connectSignals();
+    createSignals();
     createShortcuts();
 }
 
@@ -45,7 +44,7 @@ void MainWindow::setIcons()
     ui->playStopButton->setIcon(QIcon(":/icons/resumePlaying.png"));
 }
 
-void MainWindow::connectSignals()
+void MainWindow::createSignals()
 {
     connect(ui->loadPlaylistButton, SIGNAL(clicked()), this, SLOT(loadPlaylist()));
     connect(ui->playStopButton, SIGNAL(toggled(bool)), this, SLOT(switchPlaying(bool)));
@@ -55,9 +54,8 @@ void MainWindow::connectSignals()
     connect(ui->stopButton, SIGNAL(clicked()), this, SLOT(stopSong()));
     connect(ui->songSlider, SIGNAL(sliderPressed()), player, SLOT(pause()));
     connect(ui->songSlider, SIGNAL(sliderReleased()), this, SLOT(onSongSliderReleased()));
-    connect(ui->soundVolumeSlider, SIGNAL(sliderMoved(int)), player, SLOT(setVolume(int)));
+    connect(ui->soundVolumeSlider, SIGNAL(sliderMoved(int)), player, SLOT(setVolume(int))); 
     connect(ui->songSearchLineEdit, SIGNAL(textChanged(QString)), this, SLOT(searchSong(QString)));
-    connect(player, SIGNAL(currentMediaChanged(QMediaContent)), this, SLOT(onCurrentMediaChanged(QMediaContent)));
     connect(player, SIGNAL(volumeChanged(int)), this, SLOT(onVolumeChanged(int)));
     connect(player, SIGNAL(durationChanged(qint64)), this,  SLOT(onDurationChanged(qint64)));
     connect(player, SIGNAL(positionChanged(qint64)), this, SLOT(onPositionChanged(qint64)));
@@ -111,13 +109,21 @@ void MainWindow::setPosition(qint64 position)
     player->setPosition(position);
 }
 
-void MainWindow::onCurrentSelectionChanged(const QItemSelection &current, const QItemSelection &previous)
+void MainWindow::onCurrentIndexChanged(int index)
 {
-    if (current.indexes().isDetached() || current.indexes().isEmpty()) {
+    ui->playlistTableView->selectRow(index);
+    player->setMedia(playlistTableModel->getPlaylist()->currentAudio());
+    ui->songNameLabel->setText(playlistTableModel->getPlaylist()->currentAudio().titel);
+    ui->interpretLabel->setText(playlistTableModel->getPlaylist()->currentAudio().artist);
+    player->play();
+}
+
+void MainWindow::onCurrentSelectionChanged(const QModelIndex &selection)
+{
+    if (!selection.isValid()) {
         return;
     }
-    int row = current.indexes().at(0).row();
-    player->playlist()->setCurrentIndex(row);
+    playlistTableModel->getPlaylist()->setCurrentIndex(selection.row());
 }
 
 void MainWindow::onVolumeChanged(int volume)
@@ -138,15 +144,6 @@ void MainWindow::onPositionChanged(qint64 position)
 {
     setTimeLabel(ui->positionLabel, position);
     ui->songSlider->setSliderPosition(position);
-}
-
-void MainWindow::onCurrentMediaChanged(QMediaContent currentMedia)
-{
-    int currentIndex = player->playlist()->currentIndex();
-    ui->playlistTableView->selectRow(currentIndex);
-    ui->songNameLabel->setText(playlistTableModel->getPlaylist()->currentAudio().titel);
-    ui->interpretLabel->setText(playlistTableModel->getPlaylist()->currentAudio().artist);
-    player->play();
 }
 
 void MainWindow::setTimeLabel(QLabel *label, qint64 timeInMs)
@@ -195,14 +192,13 @@ void MainWindow::loadPlaylist()
         playlist->addMedia(AudioMedia(songUrls[i]));
         playlistTableModel->setRowData(playlistTableModel->getIndexesOfRow(i), getMetaData(songUrls[i]));
     };
-    filterProxyModel->setSourceModel(playlistTableModel);
-    ui->playlistTableView->setModel(filterProxyModel);
-    player->setPlaylist(playlist);
+    ui->playlistTableView->setModel(playlistTableModel);
     connect(ui->nextSongButton, SIGNAL(clicked()), this, SLOT(nextSong()));
     connect(ui->lastSongButton, SIGNAL(clicked()), this, SLOT(previousSong()));
     connect(ui->randomSongButton, SIGNAL(clicked()), this, SLOT(randomSong()));
-    connect(ui->playlistTableView->selectionModel(), SIGNAL(selectionChanged(QItemSelection,QItemSelection)),
-            this, SLOT(onCurrentSelectionChanged(QItemSelection,QItemSelection)));
+    connect(ui->playlistTableView, SIGNAL(doubleClicked(QModelIndex)), this, SLOT(onCurrentSelectionChanged(QModelIndex)));
+    connect(playlistTableModel->getPlaylist(), SIGNAL(currentIndexChanged(int)), this, SLOT(onCurrentIndexChanged(int)));
+    playlistTableModel->getPlaylist()->setCurrentIndex(0);
 }
 
 void MainWindow::stopSong()
@@ -213,35 +209,33 @@ void MainWindow::stopSong()
 
 void MainWindow::searchSong(QString titel)
 {
-    filterProxyModel->setFilterKeyColumn(0);
-    filterProxyModel->setFilterFixedString(titel);
-    filterProxyModel->filterKeyColumn();
+    ui->playlistTableView->keyboardSearch(titel);
 }
 
 void MainWindow::randomSong()
 {
     std::random_device randomHardwareNumber;
     std::mt19937 seedGenerator(randomHardwareNumber());
-    std::uniform_int_distribution<> distribution(0,  player->playlist()->mediaCount() - 1);
-    player->playlist()->setCurrentIndex(distribution(seedGenerator));
+    std::uniform_int_distribution<> distribution(0,  playlistTableModel->getPlaylist()->mediaCount() - 1);
+    playlistTableModel->getPlaylist()->setCurrentIndex(distribution(seedGenerator));
 }
 
 void MainWindow::nextSong()
 {
-    int currentIndex = player->playlist()->currentIndex();
-    if (currentIndex >= player->playlist()->mediaCount() - 1) {
+    int currentIndex = playlistTableModel->getPlaylist()->currentIndex();
+    if (currentIndex >= playlistTableModel->getPlaylist()->mediaCount() - 1) {
         return;
     }
-    player->playlist()->setCurrentIndex(currentIndex + 1);
+    playlistTableModel->getPlaylist()->setCurrentIndex(currentIndex + 1);
 }
 
 void MainWindow::previousSong()
 {
-    int currentIndex = player->playlist()->currentIndex();
+    int currentIndex = playlistTableModel->getPlaylist()->currentIndex();
     if (currentIndex <= 0) {
         return;
     }
-    player->playlist()->setCurrentIndex(currentIndex - 1);
+    playlistTableModel->getPlaylist()->setCurrentIndex(currentIndex - 1);
 }
 
 QList<QUrl> MainWindow::getSongUrlsFromDialog()
