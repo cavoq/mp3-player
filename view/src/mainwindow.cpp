@@ -59,13 +59,14 @@ void MainWindow::createSignals()
     connect(player, SIGNAL(volumeChanged(int)), this, SLOT(onVolumeChanged(int)));
     connect(player, SIGNAL(durationChanged(qint64)), this,  SLOT(onDurationChanged(qint64)));
     connect(player, SIGNAL(positionChanged(qint64)), this, SLOT(onPositionChanged(qint64)));
+    connect(player, SIGNAL(mediaStatusChanged(QMediaPlayer::MediaStatus)), this, SLOT(onMediaStatusChanged(QMediaPlayer::MediaStatus)));
 }
 
 void MainWindow::createShortcuts()
 {
     QList<QShortcut*> shortcuts;
     shortcuts.append(new QShortcut(QKeySequence(Qt::CTRL + Qt::Key_O), this, SLOT(loadPlaylist())));
-    shortcuts.append(new QShortcut(QKeySequence(Qt::Key_Space), this, SLOT(switchPlaying())));
+    shortcuts.append(new QShortcut(QKeySequence(Qt::Key_Space), ui->playStopButton, SLOT(toggle())));
     shortcuts.append(new QShortcut(QKeySequence(Qt::CTRL + Qt::Key_N), this, SLOT(nextSong())));
     shortcuts.append(new QShortcut(QKeySequence(Qt::CTRL + Qt::Key_L), this, SLOT(previousSong())));
     shortcuts.append(new QShortcut(QKeySequence(Qt::CTRL + Qt::Key_Right), this, SLOT(fastForward())));
@@ -73,11 +74,6 @@ void MainWindow::createShortcuts()
     for (int i = 0; i < shortcuts.count() - 2; ++i) {
         shortcuts[i]->setAutoRepeat(false);
     }
-}
-
-void MainWindow::switchPlaying()
-{
-    ui->playStopButton->setChecked(!ui->playStopButton->isChecked());
 }
 
 void MainWindow::fastForward()
@@ -115,7 +111,8 @@ void MainWindow::onCurrentIndexChanged(int index)
     player->setMedia(playlistTableModel->getPlaylist()->currentAudio());
     ui->songNameLabel->setText(playlistTableModel->getPlaylist()->currentAudio().titel);
     ui->interpretLabel->setText(playlistTableModel->getPlaylist()->currentAudio().artist);
-    player->play();
+    switchPlaying(false);
+    ui->playStopButton->setChecked(false);
 }
 
 void MainWindow::onCurrentSelectionChanged(const QModelIndex &selection)
@@ -165,7 +162,7 @@ void MainWindow::switchMute(bool muted)
 
 void MainWindow::switchPlaying(bool playing)
 {
-    if (!playing) {
+    if (playing) {
         switchButton(ui->playStopButton, QIcon(":/icons/resumePlaying"), "Song wiedergeben");
         player->pause();
         return;
@@ -188,10 +185,7 @@ void MainWindow::loadPlaylist()
     }
     AudioPlaylist *playlist = new AudioPlaylist();
     playlistTableModel = new PlaylistTableModel(playlist, this);
-    for (int i = 0; i < songUrls.count(); ++i) {
-        playlist->addMedia(AudioMedia(songUrls[i]));
-        playlistTableModel->setRowData(playlistTableModel->getIndexesOfRow(i), getMetaData(songUrls[i]));
-    };
+    initializePlaylist(playlist, songUrls);
     ui->playlistTableView->setModel(playlistTableModel);
     connect(ui->nextSongButton, SIGNAL(clicked()), this, SLOT(nextSong()));
     connect(ui->lastSongButton, SIGNAL(clicked()), this, SLOT(previousSong()));
@@ -199,12 +193,23 @@ void MainWindow::loadPlaylist()
     connect(ui->playlistTableView, SIGNAL(doubleClicked(QModelIndex)), this, SLOT(onCurrentSelectionChanged(QModelIndex)));
     connect(playlistTableModel->getPlaylist(), SIGNAL(currentIndexChanged(int)), this, SLOT(onCurrentIndexChanged(int)));
     playlistTableModel->getPlaylist()->setCurrentIndex(0);
+    player->setVolume(50);
+}
+
+void MainWindow::initializePlaylist(AudioPlaylist *playlist, QList<QUrl> &songUrls)
+{
+    for (int i = 0; i < songUrls.count(); ++i) {
+        playlist->addMedia(AudioMedia(songUrls[i]));
+        playlistTableModel->setRowData(playlistTableModel->getIndexesOfRow(i), getMetaData(songUrls[i]));
+    };
 }
 
 void MainWindow::stopSong()
 {
+    if (!ui->playStopButton->isChecked()) {
+        ui->playStopButton->toggle();
+    }
     player->stop();
-    ui->playStopButton->setChecked(false);
 }
 
 void MainWindow::searchSong(QString titel)
@@ -255,4 +260,11 @@ QVariantList MainWindow::getMetaData(QUrl songUrl)
     const QVariant genre = QVariant(file.tag()->genre().toCString());
     metaData << title << artist << album << length << genre;
     return metaData;
+}
+
+void MainWindow::onMediaStatusChanged(QMediaPlayer::MediaStatus status)
+{
+    if (status == QMediaPlayer::EndOfMedia) {
+        nextSong();
+    }
 }

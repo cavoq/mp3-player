@@ -20,13 +20,13 @@ class MainWindow : public QMainWindow
 public slots:
     void loadPlaylist();
     void switchPlaying(bool playing);
-    void switchPlaying();
     void switchMute(bool muted);
     void onDurationChanged(qint64 duration);
     void onPositionChanged(qint64 position);
     void onVolumeChanged(int volume);
     void onCurrentIndexChanged(int index);
     void onCurrentSelectionChanged(const QModelIndex &selection);
+    void onMediaStatusChanged(QMediaPlayer::MediaStatus status);
     void fastForward();
     void rewind();
     void stopSong();
@@ -51,6 +51,7 @@ private:
     void setPosition(qint64 position);
     void switchButton(QToolButton *button, QIcon icon, QString tooltip);
     QList<QUrl> getSongUrlsFromDialog();
+    void initializePlaylist(AudioPlaylist *playlist, QList<QUrl> &songUrls);
     QVariantList getMetaData(QUrl song);
 };
 
