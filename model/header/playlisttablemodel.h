@@ -12,10 +12,10 @@ public:
     explicit PlaylistTableModel(AudioPlaylist *playlist = nullptr, QObject *parent = nullptr);
     QVariant headerData(int section, Qt::Orientation orientation, int role = Qt::DisplayRole) const override;
     bool setRowData(const QModelIndexList &indexes, const QVariantList &values, int role = Qt::EditRole);
+    QMimeData *mimeData(const QModelIndexList &indexes) const override;
     bool setItemData(const QModelIndex &index, const QMap<int, QVariant> &roles) override;
     Qt::ItemFlags flags(const QModelIndex &index) const override;
     Qt::DropActions supportedDropActions() const override;
-    bool moveRows(const QModelIndex &srcParent, int srcRow, int count, const QModelIndex &dstParent, int dstChild) override;
     bool dropMimeData(const QMimeData *data, Qt::DropAction action, int row, int column, const QModelIndex &parent) override;
     int rowCount(const QModelIndex &parent = QModelIndex()) const override;
     int columnCount(const QModelIndex &parent = QModelIndex()) const override;
@@ -30,6 +30,7 @@ public:
 
 private:
     AudioPlaylist *playlist;
+    mutable int draggedRow;
 };
 
 #endif // PLAYLISTTABLEMODEL_H

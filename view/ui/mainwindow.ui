@@ -60,7 +60,7 @@
      <enum>Qt::ElideRight</enum>
     </property>
     <property name="gridStyle">
-     <enum>Qt::NoPen</enum>
+     <enum>Qt::SolidLine</enum>
     </property>
     <property name="sortingEnabled">
      <bool>true</bool>

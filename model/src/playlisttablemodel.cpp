@@ -2,6 +2,9 @@
 #include "model/header/audiomedia.h"
 #include "playlistsorter.h"
 
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wunused-parameter"
+
 PlaylistTableModel::PlaylistTableModel(AudioPlaylist *playlist, QObject *parent) : QAbstractTableModel{parent}, playlist(playlist) {}
 
 QVariant PlaylistTableModel::headerData(int section, Qt::Orientation orientation, int role) const
@@ -161,20 +164,7 @@ Qt::ItemFlags PlaylistTableModel::flags(const QModelIndex &index) const
 
 Qt::DropActions PlaylistTableModel::supportedDropActions() const
 {
-    return Qt::MoveAction;
-}
-
-bool PlaylistTableModel::moveRows(const QModelIndex &srcParent, int srcRow, int count,
-                                  const QModelIndex &dstParent, int dstChild)
-{
-    beginMoveRows(srcParent, srcRow, srcRow + count - 1, dstParent, dstChild);
-    for(int i = 0; i<count; ++i) {
-        playlist->getAudioContent().insert(dstChild + i, playlist->getAudioContent()[srcRow]);
-        int removeIndex = dstChild > srcRow ? srcRow : srcRow +1;
-        playlist->getAudioContent().removeAt(removeIndex);
-    }
-    endMoveRows();
-    return true;
+    return Qt::MoveAction | Qt::CopyAction;
 }
 
 bool PlaylistTableModel::setItemData(const QModelIndex &index, const QMap<int, QVariant> &roles)
@@ -187,16 +177,31 @@ bool PlaylistTableModel::setItemData(const QModelIndex &index, const QMap<int, Q
     return true;
 }
 
+QMimeData *PlaylistTableModel::mimeData(const QModelIndexList &indexes) const
+{
+    draggedRow = indexes.at(0).row();
+    return QAbstractTableModel::mimeData(indexes);
+}
+
 bool PlaylistTableModel::dropMimeData(const QMimeData *data, Qt::DropAction action, int row, int column, const QModelIndex &parent)
 {
     Q_UNUSED(parent);
     Q_UNUSED(column);
 
+    QList<AudioMedia> &audioList = playlist->getAudioContent();
+
     if(row == -1) {
         row = rowCount();
     }
 
-    return QAbstractTableModel::dropMimeData(data, action, row, 0, parent);
+    AudioMedia replacedSong = audioList.at(row - 1);
+    AudioMedia draggedSong = audioList.at(draggedRow);
+
+    audioList.replace(row - 1, draggedSong);
+    audioList.replace(draggedRow, replacedSong);
+
+    emit dataChanged(this->index(0, 0), this->index(this->rowCount() - 1, this->columnCount() - 1));
+    return false;
 }
 
 AudioPlaylist *PlaylistTableModel::getPlaylist() const
