@@ -1,6 +1,10 @@
+/**
+ *  Implementation of the PlaylistTableModel class, which contains all data @see MainWindow communicates.
+ */
+
 #include "model/header/playlisttablemodel.h"
 #include "model/header/audiomedia.h"
-#include "playlistsorter.h"
+#include "playlistcomparator.h"
 
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wunused-parameter"
@@ -212,7 +216,7 @@ AudioPlaylist *PlaylistTableModel::getPlaylist() const
 void PlaylistTableModel::sort(int column, Qt::SortOrder order)
 {
     QList<AudioMedia> &audioList = playlist->getAudioContent();
-    std::sort(audioList.begin(), audioList.end(), PlaylistSorter(column, order));
+    std::sort(audioList.begin(), audioList.end(), PlaylistComparator(column, order));
 
     emit dataChanged(this->index(0, 0), this->index(this->rowCount() - 1, this->columnCount() - 1));
 }

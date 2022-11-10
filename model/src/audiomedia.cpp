@@ -1,3 +1,7 @@
+/**
+ * Implementation of the AudioMedia class, defines the structure of a audio media.
+ */
+
 #include "model/header/audiomedia.h"
 
 AudioMedia::AudioMedia(const QUrl &contentUrl, QString titel, QString artist,

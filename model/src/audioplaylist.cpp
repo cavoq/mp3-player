@@ -1,3 +1,7 @@
+/**
+ *  Implementation of the AudioPlaylist class, which contains @see AudioMedia.
+ */
+
 #include "model/header/audioplaylist.h"
 
 AudioPlaylist::AudioPlaylist(QObject *parent): QMediaPlaylist(parent) {}

@@ -1,13 +1,17 @@
-#include "playlistsorter.h"
+/**
+ *  Implementation of the PlaylistComparator class, used to compare audios in the @see PlaylistTableView.
+ */
 
-PlaylistSorter::PlaylistSorter(const int column, const Qt::SortOrder order): column(column), order(order) {}
+#include "playlistcomparator.h"
 
-bool PlaylistSorter::operator()(const AudioMedia &audio1, const AudioMedia &audio2) const
+PlaylistComparator::PlaylistComparator(const int column, const Qt::SortOrder order): column(column), order(order) {}
+
+bool PlaylistComparator::operator()(const AudioMedia &audio1, const AudioMedia &audio2) const
 {
-    return PlaylistSorter::compareAudios(audio1, audio2, column, order);
+    return PlaylistComparator::compareAudios(audio1, audio2, column, order);
 }
 
-bool PlaylistSorter::compareAudios(const AudioMedia &audio1, const AudioMedia &audio2, const int column, const Qt::SortOrder order) const
+bool PlaylistComparator::compareAudios(const AudioMedia &audio1, const AudioMedia &audio2, const int column, const Qt::SortOrder order) const
 {
     switch (column) {
         case 0:

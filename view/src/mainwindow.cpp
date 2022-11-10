@@ -1,3 +1,7 @@
+/**
+ *  Implementaion of the MainWindow class, controls logic in the Model-View architecture.
+ */
+
 #include "view/header/mainwindow.h"
 #include "model/header/audiomedia.h"
 #include "ui_mainwindow.h"
@@ -30,6 +34,8 @@ MainWindow::MainWindow(QWidget *parent)
 
 MainWindow::~MainWindow()
 {
+    delete player;
+    delete playlistTableModel;
     delete ui;
 }
 
@@ -193,7 +199,7 @@ void MainWindow::loadPlaylist()
     connect(ui->playlistTableView, SIGNAL(doubleClicked(QModelIndex)), this, SLOT(onCurrentSelectionChanged(QModelIndex)));
     connect(playlistTableModel->getPlaylist(), SIGNAL(currentIndexChanged(int)), this, SLOT(onCurrentIndexChanged(int)));
     playlistTableModel->getPlaylist()->setCurrentIndex(0);
-    player->setVolume(50);
+    player->setVolume(player->volume() / 2);
 }
 
 void MainWindow::initializePlaylist(AudioPlaylist *playlist, QList<QUrl> &songUrls)
