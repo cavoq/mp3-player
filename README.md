@@ -1,5 +1,5 @@
 # mp3-player
-MP3-Player written in Qt.
+MP3-Player written in Qt for an assignment.
 
 ### Icon credits: https://freeicons.io/profile/75801
 
